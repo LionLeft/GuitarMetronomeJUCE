@@ -1,6 +1,4 @@
 # GuitarMetronomeJuce
-
-
 The idea behind this project came from a problem I faced while practicing difficult guitar exercises. 
 If you play an exercise (for example, triplets) and your timing is not synchronized with the metronome,
 the application analyzes your playing in real time and provides immediate feedback by indicating whether each note was **Early**, **Late**, or **Perfect**.
