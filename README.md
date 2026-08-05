@@ -1,6 +1,5 @@
 # GuitarMetronomeJuce
 
-A real-time guitar metronome built with JUCE.
 
 The idea behind this project came from a problem I faced while practicing difficult guitar exercises. 
 If you play an exercise (for example, triplets) and your timing is not synchronized with the metronome,
