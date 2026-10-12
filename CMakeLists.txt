@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(GuitarMetronome VERSION 1.0)
+project(GuitarMetronomeJUCE VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,19 +8,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # JUCE — update this path to wherever JUCE is installed on your machine
 # e.g. C:/JUCE  or  C:/Users/YourName/JUCE
 # ============================================================================
-add_subdirectory("C:/Users/leyteris/CLionProjects/GuitarMetronome/JUCE")
+add_subdirectory("JUCE")
 
 # ============================================================================
 # Console app — no GUI needed
 # ============================================================================
-juce_add_console_app(GuitarMetronome
-    PRODUCT_NAME "GuitarMetronome"
+juce_add_console_app(GuitarMetronomeJUCE
+    PRODUCT_NAME "GuitarMetronomeJUCE"
 )
 
 # ============================================================================
 # Source files
 # ============================================================================
-target_sources(GuitarMetronome PRIVATE
+target_sources(GuitarMetronomeJUCE PRIVATE
     main.cpp
     AudioEngine.cpp
     AudioEngine.h
@@ -29,7 +29,7 @@ target_sources(GuitarMetronome PRIVATE
 # ============================================================================
 # JUCE modules
 # ============================================================================
-target_link_libraries(GuitarMetronome PRIVATE
+target_link_libraries(GuitarMetronomeJUCE PRIVATE
     juce::juce_audio_devices
     juce::juce_audio_basics
     juce::juce_core
@@ -39,7 +39,7 @@ target_link_libraries(GuitarMetronome PRIVATE
 # ============================================================================
 # Required JUCE compile definitions
 # ============================================================================
-target_compile_definitions(GuitarMetronome PRIVATE
+target_compile_definitions(GuitarMetronomeJUCE PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
 )

@@ -284,10 +284,29 @@ void AudioEngine::processMicBuffer(const float* data, int numSamples, double buf
                 // Slot index for the k-th most recent tick
                 int slot = (writeIdx - 1 - k) & kTickMask;
                 int64_t tickUs = tickTimestampsUs[slot].load(std::memory_order_acquire);
-                int64_t diff   = onsetUs - tickUs;
 
+                int64_t diff   = onsetUs - tickUs - calibrationOffsetUs;   // was: onsetUs - tickUs
                 if (std::abs(diff) < std::abs(bestDiffUs))
                     bestDiffUs = diff;
+            }
+
+            // ── Calibration mode: collect measurements instead of giving feedback ──
+            // While calibrating, the offset is 0, so bestDiffUs is the raw round-trip
+            // delay of the metronome hearing its own click. The median of kCalClicks
+            // of these becomes calibrationOffsetUs for the rest of the session.
+            if (calibrating)
+            {
+                calDiffsUs[calCount++] = bestDiffUs;
+
+                if (calCount == kCalClicks)
+                {
+                    std::sort(calDiffsUs.begin(), calDiffsUs.end());
+                    calibrationOffsetUs = calDiffsUs[kCalClicks / 2];   // median
+                    calibrating     = false;
+                    calibrationDone = true;
+                }
+                prevInputSample = inputSample;
+                continue;   // don't print LATE/EARLY during calibration
             }
 
             float errorMs = static_cast<float>(bestDiffUs) / 1000.0f;

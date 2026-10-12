@@ -74,6 +74,22 @@ public:
     static double  nowSec();
     static int64_t nowUs();
 
+    // ── Startup latency calibration (public API) ──────────────────────────────
+    // Starts a latency measurement. Call after start(), then poll
+    // isCalibrationDone(). The speakers must be audible and the room quiet so the
+    // mic hears the metronome's own click rather than the guitar.
+    void startCalibration()
+    {
+        calibrationOffsetUs = 0;   // measure the raw delay, uncorrected
+        calCount            = 0;
+        calibrationDone     = false;
+        calibrating         = true;
+    }
+    bool    isCalibrationDone() const      { return calibrationDone; }
+    int     getCalibrationCount() const    { return calCount; }     // clicks heard so far
+    int     getCalibrationTotal() const    { return kCalClicks; }   // clicks needed
+    int64_t getCalibrationOffsetUs() const { return calibrationOffsetUs; }
+
     double sampleRate             = 44100.0;
     int    lastTimingErrorSamples = 0;  // kept for compatibility
     // Blocks the calling thread (main) and returns average latency in ms.
@@ -132,7 +148,20 @@ private:
     std::array<std::atomic<int64_t>, kMaxTicks> tickTimestampsUs {};
     std::atomic<int>                            tickWriteIndex { 0 };
 
+    // Round-trip latency (output driver -> speaker -> air -> mic -> input driver).
+    // Starts at 0 and is replaced by the median measured in startCalibration(),
+    // so no machine-specific value is hardcoded. Atomic because the main thread
+    // resets it while the input thread reads it.
+    std::atomic<int64_t> calibrationOffsetUs { 0 };
 
-
+    // ── Startup latency calibration ───────────────────────────────────────────
+    // Collects kCalClicks measurements, then stores the median. Median (not
+    // average) so one stray noise can't skew the result. Fixed-size array so
+    // the audio thread never allocates.
+    static constexpr int kCalClicks = 12;
+    std::array<int64_t, kCalClicks> calDiffsUs {};
+    std::atomic<int>                calCount        { 0 };   // atomic: main thread reads progress
+    std::atomic<bool>               calibrating     { false };
+    std::atomic<bool>               calibrationDone { false };
 
 };
